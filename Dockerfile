@@ -1,4 +1,4 @@
-FROM bde2020/hadoop-base:2.0.0-hadoop2.7.4-java8
+FROM bde2020/hadoop-base:2.0.0-hadoop3.2.1-java8
 
 MAINTAINER Yiannis Mouchakis <gmouchakis@iit.demokritos.gr>
 MAINTAINER Ivan Ermilov <ivan.s.ermilov@gmail.com>
@@ -8,13 +8,15 @@ ARG HIVE_VERSION
 # Set HIVE_VERSION from arg if provided at build, env if provided at run, or default
 # https://docs.docker.com/engine/reference/builder/#using-arg-variables
 # https://docs.docker.com/engine/reference/builder/#environment-replacement
-ENV HIVE_VERSION=${HIVE_VERSION:-2.3.2}
+ENV HIVE_VERSION=${HIVE_VERSION:-3.1.2}
 
 ENV HIVE_HOME /opt/hive
 ENV PATH $HIVE_HOME/bin:$PATH
 ENV HADOOP_HOME /opt/hadoop-$HADOOP_VERSION
 
 WORKDIR /opt
+ENV http_proxy http://192.168.4.61:7890
+ENV https_proxy http://192.168.4.61:7890
 
 #Install Hive and PostgreSQL JDBC
 RUN apt-get update && apt-get install -y wget procps && \
@@ -25,7 +27,9 @@ RUN apt-get update && apt-get install -y wget procps && \
 	rm apache-hive-$HIVE_VERSION-bin.tar.gz && \
 	apt-get --purge remove -y wget && \
 	apt-get clean && \
-	rm -rf /var/lib/apt/lists/*
+	rm -rf /var/lib/apt/lists/* && \
+        rm  /opt/hive/lib/guava-19.0.jar && \
+        cp $HADOOP_HOME/share/hadoop/common/lib/guava*.jar /opt/hive/lib
 
 
 #Spark should be compiled with Hive to be able to use it
