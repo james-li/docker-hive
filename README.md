@@ -1,49 +1,49 @@
-[![Gitter chat](https://badges.gitter.im/gitterHQ/gitter.png)](https://gitter.im/big-data-europe/Lobby)
+# docker hive & zookeeper
+这是一个集成docker hive 3.1.2和zookeeper的docker项目。需要安装docker-compose
+https://docs.docker.com/compose/
+在这个docker项目里，包括三个zookeeper进程，分别映射到端口2181/2182/2183。
 
-# docker-hive
-
-This is a docker container for Apache Hive 2.3.2. It is based on https://github.com/big-data-europe/docker-hadoop so check there for Hadoop configurations.
-This deploys Hive and starts a hiveserver2 on port 10000.
-Metastore is running with a connection to postgresql database.
-The hive configuration is performed with HIVE_SITE_CONF_ variables (see hadoop-hive.env for an example).
-
-To run Hive with postgresql metastore:
+运行docker：
 ```
-    docker-compose up -d
+./run-docker-compose.sh up -d
 ```
-
-To deploy in Docker Swarm:
+停止docker：
 ```
-    docker stack deploy -c docker-compose.yml hive
+./run-docker-compose.sh down
 ```
 
-To run a PrestoDB 0.181 with Hive connector:
+# 测试
+客户端需要配置hive-server的hostname，指向docker服务器的ip
+## 直接访问hive服务器
+运行beeline:
+```
+ beeline
+ SLF4J: Class path contains multiple SLF4J bindings.
+ SLF4J: Found binding in [jar:file:/mnt/d/work/src/beeline/apache-hive-3.1.2-bin/lib/log4j-slf4j-impl-2.10.0.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+ SLF4J: Found binding in [jar:file:/mnt/d/work/src/beeline/hadoop-2.8.0/share/hadoop/common/lib/slf4j-log4j12-1.7.10.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+ SLF4J: See http://www.slf4j.org/codes.html#multiple_bindings for an explanation.
+ SLF4J: Actual binding is of type [org.apache.logging.slf4j.Log4jLoggerFactory]
+ Beeline version 3.1.2 by Apache Hive
+ beeline> !connect jdbc:hive2://192.168.4.40:10000/default
+ Connecting to jdbc:hive2://192.168.4.40:10000/default
+ Enter username for jdbc:hive2://192.168.4.40:10000/default:
+ Enter password for jdbc:hive2://192.168.4.40:10000/default:
+ Enter password for jdbc:hive2://192.168.4.40:10000/default: Connected to: Apache Hive (version 3.1.2)
+ Driver: Hive JDBC (version 3.1.2)
+ Transaction isolation: TRANSACTION_REPEATABLE_READ
+ 0: jdbc:hive2://192.168.4.40:10000/default>
+ ```
+ ## 通过zookeeper访问hive服务器
+ 运行beeline:
+ ```
+  beeline
+  SLF4J: Class path contains multiple SLF4J bindings.
+  SLF4J: Found binding in [jar:file:/mnt/d/work/src/beeline/apache-hive-3.1.2-bin/lib/log4j-slf4j-impl-2.10.0.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+  SLF4J: Found binding in [jar:file:/mnt/d/work/src/beeline/hadoop-2.8.0/share/hadoop/common/lib/slf4j-log4j12-1.7.10.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+  SLF4J: See http://www.slf4j.org/codes.html#multiple_bindings for an explanation.
+  SLF4J: Actual binding is of type [org.apache.logging.slf4j.Log4jLoggerFactory]
+  Beeline version 3.1.2 by Apache Hive
+  beeline> !connect jdbc:hive2://192.168.4.40:2181,192.168.4.40:2182,192.168.4.40:2183/;serviceDiscoveryMode=zooKeeper;zooKeeperNamespace=hiveserver2
+  ```
+  这里**192.168.4.40**是运行docker服务器的ip地址。
 
-```
-  docker-compose up -d presto-coordinator
-```
-
-This deploys a Presto server listens on port `8080`
-
-## Testing
-Load data into Hive:
-```
-  $ docker-compose exec hive-server bash
-  # /opt/hive/bin/beeline -u jdbc:hive2://localhost:10000
-  > CREATE TABLE pokes (foo INT, bar STRING);
-  > LOAD DATA LOCAL INPATH '/opt/hive/examples/files/kv1.txt' OVERWRITE INTO TABLE pokes;
-```
-
-Then query it from PrestoDB. You can get [presto.jar](https://prestosql.io/docs/current/installation/cli.html) from PrestoDB website:
-```
-  $ wget https://repo1.maven.org/maven2/io/prestosql/presto-cli/308/presto-cli-308-executable.jar
-  $ mv presto-cli-308-executable.jar presto.jar
-  $ chmod +x presto.jar
-  $ ./presto.jar --server localhost:8080 --catalog hive --schema default
-  presto> select * from pokes;
-```
-
-## Contributors
-* Ivan Ermilov [@earthquakesan](https://github.com/earthquakesan) (maintainer)
-* Yiannis Mouchakis [@gmouchakis](https://github.com/gmouchakis)
-* Ke Zhu [@shawnzhu](https://github.com/shawnzhu)
