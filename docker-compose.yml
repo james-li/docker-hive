@@ -2,7 +2,7 @@ version: "3"
 
 services:
   namenode:
-    image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
+    image: registry.cloudbility.cn/guanjia/cloudguanjia/hadoop-namenode:2.0.0-hadoop3.2.1-java8
     hostname: namenode
     container_name: namenode
     volumes:
@@ -14,7 +14,7 @@ services:
     ports:
       - "9870:9870"
   datanode:
-    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    image: registry.cloudbility.cn/guanjia/cloudguanjia/hadoop-datanode:2.0.0-hadoop3.2.1-java8
     hostname: datanode
     container_name: datanode
     volumes:
@@ -26,7 +26,7 @@ services:
     ports:
       - "50075:50075"
   hive-server:
-    image: bde2020/hive:3.1.2-postgresql-metastore-fix
+    image: registry.cloudbility.cn/guanjia/cloudguanjia/hive:3.1.2-postgresql-metastore
     hostname: hive-server
     container_name: hive-server
     env_file:
@@ -37,7 +37,7 @@ services:
     ports:
       - "10000:10000"
   hive-metastore:
-    image: bde2020/hive:3.1.2-postgresql-metastore-fix
+    image: registry.cloudbility.cn/guanjia/cloudguanjia/hive:3.1.2-postgresql-metastore
     hostname: hive-metastore
     container_name: hive-metastore
     env_file:
@@ -48,12 +48,12 @@ services:
     ports:
       - "9083:9083"
   hive-metastore-postgresql:
-    image: bde2020/hive-metastore-postgresql:3.1.0
+    image: registry.cloudbility.cn/guanjia/cloudguanjia/hive-metastore-postgresql:3.1.0
     container_name: hive-metastore-postgresql
     hostname: hive-metastore-postgresql
 
   zoo1:
-    image: zookeeper
+    image: registry.cloudbility.cn/guanjia/cloudguanjia/zookeeper:3.6.1
     restart: always
     container_name: zoo1
     hostname: zoo1
